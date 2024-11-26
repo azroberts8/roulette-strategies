@@ -18,13 +18,13 @@ class PlayPrototype {
   protected _bankAmount: number;
   protected _bets: Array<Bet> = [];
   protected _minimumBet: number;
-  protected _previousBet: Play;
+  protected _previousBet?: Play;
   protected _playIteration: number;
   protected _busted = false;
 
   constructor({
     bankAmount, minimumBet, previousBet, playIteration
-  }: { bankAmount: number, minimumBet: number, previousBet: Play, playIteration: number }) {
+  }: { bankAmount: number, minimumBet: number, previousBet?: Play, playIteration: number }) {
     this._bankAmount = bankAmount;
     this._minimumBet = minimumBet;
     this._previousBet = previousBet;
@@ -63,7 +63,7 @@ class PlayPrototype {
 class ColorDouble extends PlayPrototype implements Play {
   placeBet(): void {
     let betAmount = this._minimumBet;
-    if(this._previousBet.payout === 0)
+    if(typeof this._previousBet !== "undefined" && this._previousBet.payout === 0)
       betAmount = this._previousBet.totalBetAmount * 2;
 
     if(betAmount < this._bankAmount) {
@@ -89,3 +89,6 @@ class ColorDouble extends PlayPrototype implements Play {
     });
   }
 }
+
+export type { Play }
+export { ColorDouble }
