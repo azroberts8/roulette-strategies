@@ -12,6 +12,7 @@ interface Play {
   bets: Array<Bet>;
   placeBet(): void;
   setWinningSpace(space: number): Play | undefined;
+  toString(): string;
 }
 
 class PlayPrototype {
@@ -21,6 +22,7 @@ class PlayPrototype {
   protected _previousBet?: Play;
   protected _playIteration: number;
   protected _busted = false;
+  protected _winningSpace?: number;
 
   constructor({
     bankAmount, minimumBet, previousBet, playIteration
@@ -58,6 +60,10 @@ class PlayPrototype {
   public get bets(): Array<Bet> {
     return this._bets;
   }
+
+  public toString() {
+    return `Bank Amount: , Total Bet: , `;
+  }
 }
 
 class ColorDouble extends PlayPrototype implements Play {
@@ -66,7 +72,7 @@ class ColorDouble extends PlayPrototype implements Play {
     if(typeof this._previousBet !== "undefined" && this._previousBet.payout === 0)
       betAmount = this._previousBet.totalBetAmount * 2;
 
-    if(betAmount < this._bankAmount) {
+    if(betAmount > this._bankAmount) {
       this._busted = true;
     } else {
       this._bankAmount -= betAmount;
@@ -76,6 +82,7 @@ class ColorDouble extends PlayPrototype implements Play {
 
   setWinningSpace(space: number): ColorDouble | undefined {
     if(this._busted) return undefined;
+    this._winningSpace = space;
 
     this._bets.forEach((bet) => {
       bet.setWinningSpace(space);
@@ -87,6 +94,10 @@ class ColorDouble extends PlayPrototype implements Play {
       previousBet: this,
       playIteration: this.playIteration + 1
     });
+  }
+
+  public toString(): string {
+    return `Bank Amount: ${this._bankAmount}, Total Bet: ${this.totalBetAmount}, Bet: Black, Winning Space: ${this._winningSpace}`
   }
 }
 

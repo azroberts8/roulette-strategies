@@ -25,10 +25,7 @@ class Game {
   private _minBet: number;
   private _initialCash: number;
   private _iterations: number;
-  private _colorDoubleStats: Stats = {
-    roundsToBust: 0,
-    rounds: []
-  }
+  private _colorDoubleRounds: Array<Play> = [];
 
   constructor({
     minBet, initialCash, iterations
@@ -39,24 +36,54 @@ class Game {
   }
 
   public simulate() {
-    let colorDouble = new ColorDouble({
+    this._colorDoubleRounds.push(new ColorDouble({
       bankAmount: this._initialCash,
       minimumBet: this._minBet,
       playIteration: 0
-    });
+    }));
 
-    
+    for(let i = 0; i < this._iterations; i++) {
+      this._colorDoubleRounds[i].placeBet();
+      const space = this.spin();
+      const nextColorDouble = this._colorDoubleRounds[i].setWinningSpace(space);
+      if(typeof nextColorDouble === "undefined") {
+        break;
+      } else {
+        this._colorDoubleRounds.push(nextColorDouble);
+      }
+    }
   }
 
   public get summary(): Summary {
     return {
       doubleColor: {
         strategy: "Double Color",
-        roundsToBust: this._colorDoubleStats.roundsToBust,
-        rounds: this._colorDoubleStats.rounds,
-        bankValues: this._colorDoubleStats.rounds.map((round) => round.bankAmount)
+        roundsToBust: this._colorDoubleRounds.length,
+        rounds: this._colorDoubleRounds,
+        bankValues: this._colorDoubleRounds.map((round) => round.bankAmount)
       }
     }
+  }
+
+  public toString(): string {
+    const summary = this.summary;
+    let output = ``;
+
+    for(const [_key, value] of Object.entries(summary)) {
+      output = `${output}\nStrategy: ${value.strategy}\n`;
+      output = `${output}Rounds Until Bust: ${value.roundsToBust}\n`;
+      output = `${output}Rounds:\n`;
+      for(const round of value.rounds) {
+        output = `${output}${round.toString()}\n`;
+      }
+    }
+    output = output.concat(``)
+
+    return output;
+  }
+
+  private spin(): number {
+    return Math.floor(Math.random() * 38);
   }
 }
 
